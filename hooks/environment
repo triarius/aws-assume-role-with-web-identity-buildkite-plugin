@@ -2,6 +2,25 @@
 
 set -euo pipefail
 
+case "${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_WITH_WEB_IDENTITY_INSTALL_TOOLS:-""}" in
+  alpine)
+    echo --- :hammer: Installing required tools using apk
+    apk add --update-cache --no-progress aws-cli jq
+    ;;
+  deb)
+    echo --- :hammer: Installing required tools using apk
+    apt-get update
+    apt-get install -y python3 python3-pip jq
+    pip3 install --no-input --quiet awscli
+    ;;
+  "")
+    # skip installing
+    ;;
+  *)
+    echo Unfortunately, the specified method of installing the required
+    echo tools is not supported at the moment.
+esac
+
 if [[ -z "${BUILDKITE_PLUGIN_AWS_ASSUME_ROLE_WITH_WEB_IDENTITY_ROLE_ARN:-}" ]]; then
   echo "🚨 Missing 'role-arn' plugin configuration"
   exit 1
